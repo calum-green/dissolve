@@ -27,17 +27,15 @@ template <> class GenericItemContainer<Vec3<double>> : public GenericItem
      * Item Class
      */
     protected:
-    // Create a new GenericItem containing same class as current type
-    GenericItem *createItem(std::string_view className, std::string_view name, int flags = 0)
+    // Create a new GenericItem of this type
+    std::shared_ptr<GenericItem> produce(std::string_view name, int flags = 0) override
     {
-        if (DissolveSys::sameString(className, itemClassName()))
-            return new GenericItemContainer<Vec3<double>>(name, flags);
-        return nullptr;
+        return std::make_shared<GenericItemContainer<Vec3<double>>>(name, flags);
     }
 
     public:
     // Return class name contained in item
-    std::string_view itemClassName() { return "Vec3<double>"; }
+    std::string_view itemClassName() override { return "Vec3<double>"; }
 
     /*
      * I/O

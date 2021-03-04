@@ -12,11 +12,11 @@ class CoreData;
 /*
  * GenericItem - Base class for all GenericItemContainers
  */
-class GenericItem : public ListItem<GenericItem>
+class GenericItem
 {
     public:
     GenericItem(std::string_view name, int flags);
-    virtual ~GenericItem();
+    virtual ~GenericItem() = default;
     // Item Flags
     enum ItemFlag
     {
@@ -29,21 +29,11 @@ class GenericItem : public ListItem<GenericItem>
     /*
      * Item Class
      */
-    protected:
-    // List of all available class names (as GenericItems)
-    static List<GenericItem> itemClasses_;
-
-    protected:
-    // Create a new GenericItem containing same class as current type
-    virtual GenericItem *createItem(std::string_view className, std::string_view name, int flags = 0) = 0;
-
     public:
+    // Create a new GenericItem of this type
+    virtual std::shared_ptr<GenericItem> produce(std::string_view name, int flags = 0) = 0;
     // Return class name contained in item
     virtual std::string_view itemClassName() = 0;
-    // Add class to list of representative itemClasses_
-    static void addItemClass(GenericItem *item);
-    // Return new, empty GenericItem containing the class specified
-    static GenericItem *newItem(std::string_view className, std::string_view name, int flags = 0);
 
     /*
      * Item Contents

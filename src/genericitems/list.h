@@ -6,37 +6,45 @@
 #include "base/sysfunc.h"
 #include "genericitems/container.h"
 #include "genericitems/items.h"
-#include "templates/list.h"
 #include "templates/reflist.h"
 
 // Generic List
 class GenericList
 {
     /*
+     * Item Types
+     */
+    private:
+    // Vector of recognised item types
+    static std::vector<std::shared_ptr<GenericItem>> registeredTypes_;
+
+    public:
+    // Register item type
+    void registerItemType(std::shared_ptr<GenericItem> itemType);
+
+    /*
      * List Contents
      */
     private:
-    // List of generic items
-    List<GenericItem> items_;
+    // Vector of generic items
+    std::vector<std::shared_ptr<GenericItem>> items_;
 
     public:
     // Clear all items (except those that are marked protected)
     void clear();
     // Clear all items, including protected items
     void clearAll();
-    // Add specified item to list (from base class pointer)
-    void add(GenericItem *item);
     // Create an item of the specified type
-    GenericItem *create(std::string_view name, std::string_view itemClassName, int version = 0, int flags = 0);
+    std::shared_ptr<GenericItem> create(std::string_view name, std::string_view itemClassName, int version = 0, int flags = 0);
     // Return whether the named item is contained in the list
     bool contains(std::string_view name, std::string_view prefix = "") const;
     // Return item list
-    List<GenericItem> &items();
+    std::vector<std::shared_ptr<GenericItem>> &items();
     // Return the named item from the list
-    GenericItem *find(std::string_view name);
-    const GenericItem *find(std::string_view name) const;
+    std::shared_ptr<GenericItem> find(std::string_view name);
+    const std::shared_ptr<GenericItem> find(std::string_view name) const;
     // Return the named item from the list (with prefix)
-    GenericItem *find(std::string_view name, std::string_view prefix);
+    std::shared_ptr<GenericItem> find(std::string_view name, std::string_view prefix);
     // Return the version of the named item from the list
     int version(std::string_view name, std::string_view prefix = "") const;
     // Remove named item
@@ -57,7 +65,7 @@ class GenericList
         std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name);
 
         // Does the named variable already exist in the list?
-        auto *existingItem = find(varName);
+        auto existingItem = find(varName);
         if (existingItem)
         {
             Messenger::warn("Item '{}' already exists in the list - a dummy value will be returned instead.\n", varName);
@@ -109,7 +117,7 @@ class GenericList
         std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name);
 
         // Find item in the list
-        auto *item = find(varName);
+        auto item = find(varName);
         if (!item)
         {
             Messenger::printVerbose("No item named '{}' in list - default value item will be returned.\n", varName);
@@ -140,7 +148,7 @@ class GenericList
         std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name);
 
         // Find item in the list - if it isn't there, create it and return
-        auto *item = find(varName);
+        auto item = find(varName);
         if (!item)
         {
             if (created != nullptr)

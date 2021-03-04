@@ -3,55 +3,47 @@
 
 #include "genericitems/list.h"
 
+/*
+ * Item Types
+ */
+
+// Register item type
+void GenericList::registerItemType(std::shared_ptr<GenericItem> itemType) { registeredTypes_.push_back(itemType); }
+
 // Clear all items (except those that are marked protected)
 void GenericList::clear()
 {
-    GenericItem *item = items_.first(), *nextItem;
-    while (item)
-    {
-        nextItem = item->next();
-        if (!item->hasFlag(GenericItem::ProtectedFlag))
-            items_.remove(item);
-        item = nextItem;
-    }
+    auto it =
+        std::remove_if(items_.begin(), items_.end(), [](auto &item) { return !item->hasFlag(GenericItem::ProtectedFlag); });
+    if (it != items_.end())
+        items_.erase(it);
 }
 
 // Clear all items, including protected items
 void GenericList::clearAll() { items_.clear(); }
 
-// Add specified item to list (from base class pointer)
-void GenericList::add(GenericItem *item) { items_.own(item); }
-
 // Create an item of the specified type
-GenericItem *GenericList::create(std::string_view name, std::string_view itemClassName, int version, int flags)
+std::shared_ptr<GenericItem> GenericList::create(std::string_view name, std::string_view itemClassName, int version, int flags)
 {
     // Check for existing item with this name
-    GenericItem *newItem = find(name);
-    if (newItem)
-    {
-        Messenger::printVerbose("Item named '{}' already exists in the list, so returning it instead of creating a new one.\n",
-                                name);
-        return newItem;
-    }
+    if (find(name))
+        throw(std::runtime_error(fmt::format("Item named '{}' already exists in the list - it cannot be duplicated.\n",
+                                name)));
 
-    // Create a new item of the specified class type
-    newItem = GenericItem::newItem(itemClassName, name);
-    if (!newItem)
-    {
-        Messenger::error("GenericList::create() doesn't know how to create an item of type '{}'\n", itemClassName);
-        return nullptr;
-    }
+    // Create a new item of the specified class type - search through registered item classes list for one matching the class name provided
+    for (const auto &item : registeredTypes_)
+        if (item->itemClassName() == itemClassName)
+        {
+            auto newItem = item->produce(name, flags);
+            items_.push_back(newItem);
 
-    // Add the new item to our list
-    add(newItem);
+            // Set the item's version
+            newItem->setVersion(version);
 
-    // Set its version
-    newItem->setVersion(version);
+            return newItem;
+        }
 
-    // Set its flags
-    newItem->setFlags(flags);
-
-    return newItem;
+    throw(std::runtime_error(fmt::format("GenericList::create() doesn't know how to create an item of type '{}'\n", itemClassName)));
 }
 
 // Return whether the named item is contained in the list
@@ -60,42 +52,41 @@ bool GenericList::contains(std::string_view name, std::string_view prefix) const
     // Construct full name
     std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name);
 
-    for (auto *item = items_.first(); item != nullptr; item = item->next())
-        if (DissolveSys::sameString(item->name(), varName))
-            return true;
-
-    return false;
+    return std::find_if(items_.cbegin(), items_.cend(), [varName](auto &item) { return DissolveSys::sameString(item->name(), varName); } ) != items_.end();
 }
 
 // Return item list
-List<GenericItem> &GenericList::items() { return items_; }
+std::vector<std::shared_ptr<GenericItem>> &GenericList::items() { return items_; }
 
 // Return the named item from the list
-GenericItem *GenericList::find(std::string_view name)
+std::shared_ptr<GenericItem> GenericList::find(std::string_view name)
 {
-    for (auto *item = items_.first(); item != nullptr; item = item->next())
-        if (DissolveSys::sameString(item->name(), name))
-            return item;
+    auto it = std::find_if(items_.begin(), items_.end(), [name](auto &item) { return DissolveSys::sameString(item->name(), name); } );
+    if (it != items_.end())
+        return *it;
+
     return nullptr;
 }
 
-const GenericItem *GenericList::find(std::string_view name) const
+const std::shared_ptr<GenericItem> GenericList::find(std::string_view name) const
 {
-    for (auto *item = items_.first(); item != nullptr; item = item->next())
-        if (DissolveSys::sameString(item->name(), name))
-            return item;
+    auto it = std::find_if(items_.cbegin(), items_.cend(), [name](auto &item) { return DissolveSys::sameString(item->name(), name); } );
+    if (it != items_.end())
+        return *it;
+
     return nullptr;
 }
 
 // Return the named item from the list (with prefix)
-GenericItem *GenericList::find(std::string_view name, std::string_view prefix)
+std::shared_ptr<GenericItem> GenericList::find(std::string_view name, std::string_view prefix)
 {
     // Construct full name
     std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name);
 
-    for (auto *item = items_.first(); item != nullptr; item = item->next())
-        if (DissolveSys::sameString(item->name(), varName))
-            return item;
+    auto it = std::find_if(items_.cbegin(), items_.cend(), [varName](auto &item) { return DissolveSys::sameString(item->name(), varName); } );
+    if (it != items_.end())
+        return *it;
+
     return nullptr;
 }
 
@@ -105,9 +96,9 @@ int GenericList::version(std::string_view name, std::string_view prefix) const
     // Construct full name
     std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name);
 
-    for (auto *item = items_.first(); item != nullptr; item = item->next())
-        if (DissolveSys::sameString(item->name(), varName))
-            return item->version();
+    auto it = std::find_if(items_.cbegin(), items_.cend(), [varName](auto &item) { return DissolveSys::sameString(item->name(), varName); } );
+    if (it != items_.end())
+        return it->get()->version();
 
     return -99;
 }
@@ -115,16 +106,17 @@ int GenericList::version(std::string_view name, std::string_view prefix) const
 // Remove named item
 bool GenericList::remove(std::string_view name, std::string_view prefix)
 {
-    // First, find the named item
-    GenericItem *item = find(name, prefix);
-    if (!item)
-    {
-        Messenger::printVerbose("Couldn't find named item '{}' (prefix = '{}') in the list, so can't remove it.\n", name,
-                                prefix);
-        return false;
-    }
+    // Construct full name
+    std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name);
 
-    items_.remove(item);
+    auto it =
+        std::remove_if(items_.begin(), items_.end(), [varName](auto &item) { return DissolveSys::sameString(item->name(), varName); } );
+    if (it != items_.end())
+        return Messenger::error("Couldn't find named item '{}' (prefix = '{}') in the list, so can't remove it.\n", name,
+                                prefix);
+
+    items_.erase(it);
+
     return true;
 }
 

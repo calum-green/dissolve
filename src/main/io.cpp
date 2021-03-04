@@ -478,7 +478,7 @@ bool Dissolve::loadRestart(std::string_view filename)
             }
 
             // Realise the item in the list
-            GenericItem *item = cfg->moduleData().create(parser.argsv(2), parser.argsv(3), parser.argi(4),
+            auto item = cfg->moduleData().create(parser.argsv(2), parser.argsv(3), parser.argi(4),
                                                          parser.hasArg(5) ? parser.argi(5) : 0);
 
             // Read in the data

@@ -3,39 +3,7 @@
 
 #include "genericitems/item.h"
 
-// Static Members
-List<GenericItem> GenericItem::itemClasses_;
-
-GenericItem::GenericItem(std::string_view name, int flags) : ListItem<GenericItem>()
-{
-    name_ = name;
-    flags_ = flags;
-    version_ = 1;
-}
-
-GenericItem::~GenericItem(){};
-
-/*
- * Item Class
- */
-
-// Add class to list of representative itemClasses_
-void GenericItem::addItemClass(GenericItem *item) { itemClasses_.own(item); }
-
-// Return new, empty GenericItem containing the class specified
-GenericItem *GenericItem::newItem(std::string_view className, std::string_view name, int flags)
-{
-    // Search through registered item classes list for one matching the class name provided
-    for (auto *item = itemClasses_.first(); item != nullptr; item = item->next())
-    {
-        // See if the item can create a GenericItem of the desired type. If it can't, move on
-        GenericItem *newItem = item->createItem(className, name, flags);
-        if (newItem != nullptr)
-            return newItem;
-    }
-
-    return nullptr;
-}
+GenericItem::GenericItem(std::string_view name, int flags) : name_(name), flags_(flags), version_(1) { }
 
 /*
  * Item Contents

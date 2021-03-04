@@ -27,17 +27,15 @@ template <> class GenericItemContainer<Array2D<double>> : public GenericItem
      * Item Class
      */
     protected:
-    // Create a new GenericItem containing same class as current type
-    GenericItem *createItem(std::string_view className, std::string_view name, int flags = 0)
+    // Create a new GenericItem of this type
+    std::shared_ptr<GenericItem> produce(std::string_view name, int flags = 0) override
     {
-        if (DissolveSys::sameString(className, itemClassName()))
-            return new GenericItemContainer<Array2D<double>>(name, flags);
-        return nullptr;
+        return std::make_shared<GenericItemContainer<Array2D<double>>>(name, flags);
     }
 
     public:
     // Return class name contained in item
-    std::string_view itemClassName() { return "Array2D<double>"; }
+    std::string_view itemClassName() override { return "Array2D<double>"; }
 
     /*
      * I/O

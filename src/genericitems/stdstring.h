@@ -28,17 +28,15 @@ template <> class GenericItemContainer<std::string> : public GenericItem
      * Item Class
      */
     protected:
-    // Create a new GenericItem containing same class as current type
-    GenericItem *createItem(std::string_view className, std::string_view name, int flags = 0)
+    // Create a new GenericItem of this type
+    std::shared_ptr<GenericItem> produce(std::string_view name, int flags = 0) override
     {
-        if (DissolveSys::sameString(className, itemClassName()))
-            return new GenericItemContainer<std::string>(name, flags);
-        return nullptr;
+        return std::make_shared<GenericItemContainer<std::string>>(name, flags);
     }
 
     public:
     // Return class name contained in item
-    std::string_view itemClassName() { return "std::string"; }
+    std::string_view itemClassName() override { return "std::string"; }
 
     /*
      * I/O

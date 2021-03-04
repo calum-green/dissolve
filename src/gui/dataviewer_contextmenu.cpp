@@ -131,7 +131,7 @@ void DataViewer::showRenderableContextMenu(QPoint pos, std::shared_ptr<Renderabl
                     if (!r3d->source())
                         Messenger::error("Failed to locate 3D data to export\n");
                     else
-                        exportFormat.exportData(*r3d->source());
+                        exportFormat.exportData(r3d->source()->get());
                 }
             }
         }

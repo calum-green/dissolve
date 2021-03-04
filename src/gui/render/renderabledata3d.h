@@ -21,11 +21,11 @@ class RenderableData3D : public Renderable
      */
     private:
     // Source data
-    const Data3D *source_;
+    OptionalReferenceWrapper<const Data3D> source_;
 
     public:
     // Return source data
-    const Data3D *source() const;
+    OptionalReferenceWrapper<const Data3D> source() const;
     // Attempt to set the data source, searching the supplied list for the object
     void validateDataSource(const GenericList &sourceList) override;
     // Invalidate the current data source

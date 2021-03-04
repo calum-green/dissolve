@@ -12,7 +12,7 @@
 #include "templates/array3d.h"
 
 RenderableData3D::RenderableData3D(const Data3D *source, std::string_view objectTag)
-    : Renderable(Renderable::Data3DRenderable, objectTag), source_(source)
+    : Renderable(Renderable::Data3DRenderable, objectTag)
 {
     // Set style defaults
     displayStyle_ = SolidStyle;
@@ -31,7 +31,7 @@ RenderableData3D::~RenderableData3D() {}
  */
 
 // Return source data
-const Data3D *RenderableData3D::source() const { return source_; }
+OptionalReferenceWrapper<const Data3D> RenderableData3D::source() const { return source_; }
 
 // Attempt to set the data source, searching the supplied list for the object
 void RenderableData3D::validateDataSource(const GenericList &sourceList)
@@ -40,17 +40,20 @@ void RenderableData3D::validateDataSource(const GenericList &sourceList)
     if (!sourceDataAccessEnabled_)
         return;
 
+    if (source_)
+        return;
+
     // Search the supplied generic list for the named item
     if (!sourceList.contains(objectTag_))
         return;
-    source_ = &sourceList.value<Data3D>(objectTag_);
+    source_ = sourceList.value<Data3D>(objectTag_);
 }
 
 // Invalidate the current data source
-void RenderableData3D::invalidateDataSource() { source_ = nullptr; }
+void RenderableData3D::invalidateDataSource() { source_ = std::nullopt; }
 
 // Return version of data
-int RenderableData3D::dataVersion() { return (source_ ? source_->version() : -99); }
+int RenderableData3D::dataVersion() { return (source_ ? source_->get().version() : -99); }
 
 /*
  * Transform / Limits

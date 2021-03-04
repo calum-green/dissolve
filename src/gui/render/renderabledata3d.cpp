@@ -3,6 +3,7 @@
 
 #include "gui/render/renderabledata3d.h"
 #include "base/lineparser.h"
+#include "genericitems/list.h"
 #include "gui/render/renderablegroupmanager.h"
 #include "gui/render/view.h"
 #include "math/data3d.h"
@@ -39,9 +40,10 @@ void RenderableData3D::validateDataSource(const GenericList &sourceList)
     if (!sourceDataAccessEnabled_)
         return;
 
-    // If there is no valid source set, attempt to set it now...
-    if (!source_)
-        source_ = Data3D::findObject(objectTag_);
+    // Search the supplied generic list for the named item
+    if (!sourceList.contains(objectTag_))
+        return;
+    source_ = &sourceList.value<Data3D>(objectTag_);
 }
 
 // Invalidate the current data source

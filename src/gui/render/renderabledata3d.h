@@ -30,8 +30,6 @@ class RenderableData3D : public Renderable
     void validateDataSource(const GenericList &sourceList) override;
     // Invalidate the current data source
     void invalidateDataSource() override;
-
-    public:
     // Return version of data
     int dataVersion() override;
 

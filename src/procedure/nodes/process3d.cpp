@@ -118,9 +118,7 @@ ProcedureNode::NodeExecutionResult Process3DProcedureNode::execute(ProcessPool &
     auto &data = targetList.realise<Data3D>(fmt::format("{}//{}", name(), cfg->niceName()), prefix,
                                             GenericItem::InRestartFileFlag, &created);
     processedData_ = &data;
-
     data.setTag(name());
-    data.setObjectTag(fmt::format("{}//Process3D//{}//{}", prefix, cfg->name(), name()));
 
     // Copy the averaged data from the associated Process3D node
     data = collectNode_->accumulatedData();

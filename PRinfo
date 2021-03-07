@@ -1,0 +1,20 @@
+This PR moves the `Data1D`, `Data2D`, and `Data3D` off the old `ObjectStore` class. Such data is now located by the name of the data within a `GenericList`.
+
+Detaching from the `ObjectStore` class was relatively straightforward, but had immediate implications for data-searching in several areas:
+
+1. `Renderable`s. The `RenderableDataND` classes always located their target display data via `static ObjectStore::findObject()` which searched through the `ObjectInfo::objectTag_` assigned to each `DataND` object. Now that such a global search is not available, any `DataND` objects that are encapsulated within larger objects (e.g. `PartialSet`) must have their references set directly. This isn't an issue, as the widgets adding the data tend to know where the data is located and so can pass references on to the renderable construction. A similar case arises for data not contained in a `GenericList` at all (e.g. pair potentials) - these are known by the constructig widget, and therefore are not a problem. For other named data in a `GenericList`, the mechanism of "search-by-name" is the same as before, but now works on the `GenericItem` name instead.
+2. For data contained within other classes (e.g. `Data1D` forming the basis of `PartialSet`) thier removal from `ObjectStore` means that they are no longer searchable (only "top-level" items in the `GenericList` are searchable by name). To overcome this, an additional `virtual` has been added to `GenericItem`....
+3. `DataTest` module ???
+
+Notes:
+- This breaks compatibility with existing restart files.
+- Naming of `GenericList` data items now follow "double-slash" delimiting (as per the old `ObjectStore` style) rather than underscore.
+
+### Related PR Hierarchy
+
+Listed in order of review / merge ordering (rebasing required at each stage):
+
+- ~#575 Remove state I/O for tabs, views, and charts~
+- #576 Move `Renderable` and `RenderableGroup` to `std:vector`
+- #582 Template renderable creation.
+- `THIS` Remove ObjectStore 2

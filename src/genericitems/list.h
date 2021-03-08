@@ -51,7 +51,7 @@ class GenericList
     template <class T> T &realise(std::string_view name, std::string_view prefix = "", int flags = -1, bool *created = nullptr)
     {
         // Construct full name
-        std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name);
+        std::string varName = prefix.empty() ? std::string(name) : fmt::format("{}//{}", prefix, name);
 
         auto it = items_.find(varName);
         if (it != items_.end())
@@ -61,7 +61,7 @@ class GenericList
                 throw(std::runtime_error(
                     fmt::format("GenericList::realise() - Item named '{}' exists, but has a different type "
                                 "to that requested ('{}' vs '{}').\n",
-                                prefix.empty() ? name : fmt::format("{}_{}", prefix, name),
+                                prefix.empty() ? name : fmt::format("{}//{}", prefix, name),
                                 std::get<GenericItem::AnyObject>(it->second).type().name(), typeid(T).name())));
 
             // Bump version of the item and return it
@@ -87,16 +87,16 @@ class GenericList
     // Return named (const) item as templated type
     template <class T> const T &value(std::string_view name, std::string_view prefix = "") const
     {
-        auto it = items_.find(prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name));
+        auto it = items_.find(prefix.empty() ? std::string(name) : fmt::format("{}//{}", prefix, name));
         if (it == items_.end())
             throw(std::runtime_error(fmt::format("GenericList::value() - Item named '{}' does not exist.\n",
-                                                 prefix.empty() ? name : fmt::format("{}_{}", prefix, name))));
+                                                 prefix.empty() ? name : fmt::format("{}//{}", prefix, name))));
 
         // Check type before we attempt to cast it
         if (std::get<GenericItem::AnyObject>(it->second).type() != typeid(T))
             throw(std::runtime_error(fmt::format(
                 "GenericList::value() - Item named '{}' exists, but has a different type to that requested ('{}' vs '{}').\n",
-                prefix.empty() ? name : fmt::format("{}_{}", prefix, name),
+                prefix.empty() ? name : fmt::format("{}//{}", prefix, name),
                 std::get<GenericItem::AnyObject>(it->second).type().name(), typeid(T).name())));
 
         return std::any_cast<const T &>(std::get<GenericItem::AnyObject>(it->second));
@@ -104,7 +104,7 @@ class GenericList
     // Return copy of named item as templated type, or a default value
     template <class T> T valueOr(std::string_view name, std::string_view prefix, T valueIfNotFound) const
     {
-        auto it = items_.find(prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name));
+        auto it = items_.find(prefix.empty() ? std::string(name) : fmt::format("{}//{}", prefix, name));
         if (it == items_.end())
             return valueIfNotFound;
 
@@ -112,7 +112,7 @@ class GenericList
         if (std::get<GenericItem::AnyObject>(it->second).type() != typeid(T))
             throw(std::runtime_error(fmt::format(
                 "GenericList::value() - Item named '{}' exists, but has a different type to that requested ('{}' vs '{}').\n",
-                prefix.empty() ? name : fmt::format("{}_{}", prefix, name),
+                prefix.empty() ? name : fmt::format("{}//{}", prefix, name),
                 std::get<GenericItem::AnyObject>(it->second).type().name(), typeid(T).name())));
 
         return std::any_cast<const T>(std::get<GenericItem::AnyObject>(it->second));
@@ -120,17 +120,17 @@ class GenericList
     // Retrieve named item as templated type, assuming that it is going to be modified
     template <class T> T &retrieve(std::string_view name, std::string_view prefix = "")
     {
-        auto it = items_.find(prefix.empty() ? std::string(name) : fmt::format("{}_{}", prefix, name));
+        auto it = items_.find(prefix.empty() ? std::string(name) : fmt::format("{}//{}", prefix, name));
         if (it == items_.end())
             throw(std::runtime_error(fmt::format("GenericList::retrieve() - Item named '{}' does not exist.\n",
-                                                 prefix.empty() ? name : fmt::format("{}_{}", prefix, name))));
+                                                 prefix.empty() ? name : fmt::format("{}//{}", prefix, name))));
 
         // Check type before we attempt to cast it
         if (std::get<GenericItem::AnyObject>(it->second).type() != typeid(T))
             throw(
                 std::runtime_error(fmt::format("GenericList::retrieve() - Item named '{}' exists, but has a different type "
                                                "to that requested ('{}' vs '{}').\n",
-                                               prefix.empty() ? name : fmt::format("{}_{}", prefix, name),
+                                               prefix.empty() ? name : fmt::format("{}//{}", prefix, name),
                                                std::get<GenericItem::AnyObject>(it->second).type().name(), typeid(T).name())));
 
         ++std::get<GenericItem::Version>(it->second);

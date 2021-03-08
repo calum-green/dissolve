@@ -4,24 +4,13 @@
 #include "math/data1d.h"
 #include "base/lineparser.h"
 #include "base/messenger.h"
-#include "math/histogram1d.h"
+#include "base/sysfunc.h"
 #include "templates/algorithms.h"
 
-// Static Members (ObjectStore)
-template <class Data1D> RefDataList<Data1D, int> ObjectStore<Data1D>::objects_;
-template <class Data1D> int ObjectStore<Data1D>::objectCount_ = 0;
-template <class Data1D> int ObjectStore<Data1D>::objectType_ = ObjectInfo::Data1DObject;
-template <class Data1D> std::string_view ObjectStore<Data1D>::objectTypeName_ = "Data1D";
-
 Data1D::Data1D()
-    : PlottableData(PlottableData::OneAxisPlottable), ObjectStore<Data1D>(this), hasError_(false)
-{
-}
+    : PlottableData(PlottableData::OneAxisPlottable), hasError_(false) { }
 
-Data1D::Data1D(const Data1D &source) : PlottableData(PlottableData::OneAxisPlottable), ObjectStore<Data1D>(this)
-{
-    (*this) = source;
-}
+Data1D::Data1D(const Data1D &source) : PlottableData(PlottableData::OneAxisPlottable) { (*this) = source; }
 
 // Clear Data
 void Data1D::clear()
@@ -288,11 +277,7 @@ void Data1D::operator+=(const Data1D &source)
     }
 
     // Check array sizes
-    if (x_.size() != source.x_.size())
-    {
-        Messenger::error("Can't += these Data1D together since they are of differing sizes.\n");
-        return;
-    }
+    assert(x_.size() == source.x_.size());
 
     ++version_;
 
@@ -378,12 +363,7 @@ bool Data1D::deserialise(LineParser &parser)
 {
     clear();
 
-    // Read object tag
-    if (parser.readNextLine(LineParser::Defaults) != LineParser::Success)
-        return false;
-    setObjectTag(parser.line());
-
-    // Read object name
+    // Read name
     if (parser.readNextLine(LineParser::KeepBlanks) != LineParser::Success)
         return false;
     tag_ = parser.line();
@@ -412,9 +392,7 @@ bool Data1D::deserialise(LineParser &parser)
 // Write data through specified LineParser
 bool Data1D::serialise(LineParser &parser) const
 {
-    // Write object tag and name
-    if (!parser.writeLineF("{}\n", objectTag()))
-        return false;
+    // Write tag
     if (!parser.writeLineF("{}\n", tag_))
         return false;
 

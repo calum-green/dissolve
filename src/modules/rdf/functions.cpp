@@ -357,7 +357,7 @@ bool RDFModule::calculateGR(GenericList &processingData, ProcessPool &procPool, 
 
     procPool.resetAccumulatedTime();
     timer.start();
-    for_each_pair(0, originalgr.nAtomTypes(), [&originalgr, &procPool, method](auto typeI, auto typeJ) {
+    for_each_pair_early(0, originalgr.nAtomTypes(), [&originalgr, &procPool, method](auto typeI, auto typeJ) -> EarlyReturn<bool> {
         // Sum histogram data from all processes (except if using RDFModule::TestMethod, where all processes
         // have all data already)
         if (method != RDFModule::TestMethod)
@@ -371,6 +371,8 @@ bool RDFModule::calculateGR(GenericList &processingData, ProcessPool &procPool, 
         // Create unbound histogram from total and bound data
         originalgr.unboundHistogram(typeI, typeJ) = originalgr.fullHistogram(typeI, typeJ);
         originalgr.unboundHistogram(typeI, typeJ).add(originalgr.boundHistogram(typeI, typeJ), -1.0);
+
+        return EarlyReturn<bool>::Continue;
     });
 
     // Transform histogram data into radial distribution functions
@@ -472,7 +474,6 @@ bool RDFModule::sumUnweightedGR(GenericList &processingData, ProcessPool &procPo
 
     // Set up PartialSet container
     summedUnweightedGR.setUpPartials(combinedAtomTypes, parentModule->uniqueName(), "unweighted", "gr", "r, Angstroms");
-    summedUnweightedGR.setObjectTags(fmt::format("{}//UnweightedGR", parentModule->uniqueName()));
 
     // Determine total weighting factors and combined density over all Configurations, and set up a Configuration/weight
     // RefList for simplicity
@@ -562,7 +563,6 @@ bool RDFModule::sumUnweightedGR(GenericList &processingData, ProcessPool &procPo
 
     // Set up PartialSet container
     summedUnweightedGR.setUpPartials(combinedAtomTypes, parentModule->uniqueName(), "unweighted", "gr", "r, Angstroms");
-    summedUnweightedGR.setObjectTags(fmt::format("{}//UnweightedGR//{}", parentModule->uniqueName(), moduleGroup->name()));
 
     // Sum Configurations into the PartialSet
     std::string fingerprint;

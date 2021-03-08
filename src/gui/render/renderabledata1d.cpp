@@ -3,6 +3,7 @@
 
 #include "gui/render/renderabledata1d.h"
 #include "base/lineparser.h"
+#include "genericitems/list.h"
 #include "gui/render/renderablegroupmanager.h"
 #include "gui/render/view.h"
 
@@ -22,6 +23,9 @@ RenderableData1D::~RenderableData1D() {}
  * Data
  */
 
+// Return source data
+const Data1D *RenderableData1D::source() const { return source_; }
+
 // Attempt to set the data source, searching the supplied list for the object
 void RenderableData1D::validateDataSource(const GenericList &sourceList)
 {
@@ -32,7 +36,15 @@ void RenderableData1D::validateDataSource(const GenericList &sourceList)
     if (source_)
         return;
 
-    source_ = Data1D::findObject(objectTag_);
+    // Search the supplied generic list for the named item
+    if (!sourceList.contains(objectTag_))
+        return;
+    auto test = sourceList.search<Data1D>(objectTag_);
+    if (test)
+    {
+        const Data1D& x = *test;
+        fmt::print("NAME = {}\n", x.tag());
+    }
 }
 
 // Invalidate the current data source

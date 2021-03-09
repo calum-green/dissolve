@@ -36,6 +36,9 @@ void RenderableData1D::validateDataSource(const GenericList &sourceList)
     if (source_)
         return;
 
+    if (!sourceList.contains(objectTag_))
+        fmt::print("!!! RenderableData1D - Still searching for data '{}'...\n", objectTag_);
+
     // Search the supplied generic list for the named item
     if (!sourceList.contains(objectTag_))
         return;

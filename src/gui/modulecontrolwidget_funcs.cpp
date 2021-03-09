@@ -60,6 +60,7 @@ void ModuleControlWidget::setModule(Module *module, Dissolve *dissolve)
     {
         ui_.ModuleControlsStack->addWidget(moduleWidget_);
         ui_.ModuleOutputButton->setEnabled(true);
+        Renderable::validateAll(dissolve_->processingModuleData());
     }
 
     updateControls();

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "gui/helpers/comboboxcontroller.h"
 #include "gui/modulewidget.h"
 #include "modules/rdf/gui/ui_modulewidget.h"
 
@@ -27,8 +28,10 @@ class RDFModuleWidget : public ModuleWidget
     private:
     // Associated Module
     RDFModule *module_;
+    // Whether valid data is being displayed
+    bool validData_;
     // DataViewers contained within this widget
-    DataViewer *partialsGraph_, *totalsGraph_;
+    DataViewer *rdfGraph_;
     // Reference to Dissolve
     Dissolve &dissolve_;
 
@@ -47,13 +50,12 @@ class RDFModuleWidget : public ModuleWidget
      * Widgets / Functions
      */
     private:
-    // Current Configuration whose data is being displayed
-    Configuration *currentConfiguration_;
-
-    private:
     // Set data targets in graphs
     void setGraphDataTargets(RDFModule *module);
 
     private slots:
-    void on_TargetCombo_currentIndexChanged(int index);
+    void on_SummedPartialsButton_triggered(bool checked);
+    void on_TotalsButton_triggered(bool checked);
+    void on_IndividualPartialsButton_triggered(bool checked);
+    void on_PartialsTargetCombo_currentIndexChanged(int index);
 };

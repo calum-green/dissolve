@@ -117,7 +117,7 @@ ProcedureNode::NodeExecutionResult Process2DProcedureNode::execute(ProcessPool &
                                             GenericItem::InRestartFileFlag, &created);
     processedData_ = &data;
 
-    data.setName(name());
+    data.setTag(name());
     data.setObjectTag(fmt::format("{}//Process2D//{}//{}", prefix, cfg->name(), name()));
 
     // Copy the averaged data from the associated Process1D node

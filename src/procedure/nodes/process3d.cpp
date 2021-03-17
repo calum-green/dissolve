@@ -119,7 +119,7 @@ ProcedureNode::NodeExecutionResult Process3DProcedureNode::execute(ProcessPool &
                                             GenericItem::InRestartFileFlag, &created);
     processedData_ = &data;
 
-    data.setName(name());
+    data.setTag(name());
     data.setObjectTag(fmt::format("{}//Process3D//{}//{}", prefix, cfg->name(), name()));
 
     // Copy the averaged data from the associated Process3D node

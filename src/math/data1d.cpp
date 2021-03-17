@@ -14,7 +14,7 @@ template <class Data1D> int ObjectStore<Data1D>::objectType_ = ObjectInfo::Data1
 template <class Data1D> std::string_view ObjectStore<Data1D>::objectTypeName_ = "Data1D";
 
 Data1D::Data1D()
-    : PlottableData(PlottableData::OneAxisPlottable), ListItem<Data1D>(), ObjectStore<Data1D>(this), hasError_(false)
+    : PlottableData(PlottableData::OneAxisPlottable), ObjectStore<Data1D>(this), hasError_(false)
 {
 }
 

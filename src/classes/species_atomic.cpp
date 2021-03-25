@@ -24,30 +24,13 @@ void Species::removeAtom(SpeciesAtom *i)
      * species definitions upon which the simulation has no dependencies.
      */
 
-    // Clear higher-order terms
-    angles_.clear();
-    torsions_.clear();
-    impropers_.clear();
-
-    // Detach & remove any bond terms that involve 'i'
-    auto it = std::remove_if(bonds_.begin(), bonds_.end(), [i](auto &bond) {
-        if (bond.i() == i || bond.j() == i)
-        {
-            bond.detach();
-            return true;
-        }
-        else
-            return false;
-    });
-    if (it != bonds_.end())
-        bonds_.erase(it, bonds_.end());
+    // Remove any bond terms that involve 'i'
+    while (i->nBonds())
+        removeBond(i, i->bond(0).partner(i));
 
     // Now remove the atom
-    auto atomIt = std::find_if(atoms_.begin(), atoms_.end(), [&](const auto &p) { return i == &p; });
-    atoms_.erase(atomIt);
+    atoms_.erase(std::remove_if(atoms_.begin(), atoms_.end(), [&](const auto &p) { return i == &p; }), atoms_.end());
     selectedAtoms_.remove(i);
-
-    renumberAtoms();
 
     ++version_;
 }
@@ -55,28 +38,18 @@ void Species::removeAtom(SpeciesAtom *i)
 // Return the number of Atoms in the Species
 int Species::nAtoms() const { return atoms_.size(); }
 
-// Renumber atoms so they are sequential in the list
-void Species::renumberAtoms()
-{
-    auto count = 0;
-    for (auto &i : atoms_)
-        i.setIndex(count++);
-}
-
 // Return the first Atom in the Species
 const SpeciesAtom &Species::firstAtom() const { return atoms_.front(); }
 
 // Return the nth Atom in the Species
 SpeciesAtom &Species::atom(int n)
 {
-    assert(n >= 0 && n < atoms_.size());
     auto it = std::next(atoms_.begin(), n);
     return *it;
 }
 
 const SpeciesAtom &Species::atom(int n) const
 {
-    assert(n >= 0 && n < atoms_.size());
     const auto it = std::next(atoms_.begin(), n);
     return *it;
 }

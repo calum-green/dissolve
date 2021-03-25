@@ -4,8 +4,7 @@
 #include "modules/atomshake/atomshake.h"
 #include "modules/atomshake/gui/modulewidget.h"
 
-AtomShakeModuleWidget::AtomShakeModuleWidget(QWidget *parent, const GenericList &processingData, AtomShakeModule *module)
-    : ModuleWidget(parent, processingData), module_(module)
+AtomShakeModuleWidget::AtomShakeModuleWidget(QWidget *parent, AtomShakeModule *module) : ModuleWidget(parent), module_(module)
 {
     // Set up user interface
     ui_.setupUi(this);

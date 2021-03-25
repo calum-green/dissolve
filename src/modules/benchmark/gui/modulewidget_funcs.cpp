@@ -4,8 +4,7 @@
 #include "modules/benchmark/benchmark.h"
 #include "modules/benchmark/gui/modulewidget.h"
 
-BenchmarkModuleWidget::BenchmarkModuleWidget(QWidget *parent, const GenericList &processingData, BenchmarkModule *module)
-    : ModuleWidget(parent, processingData), module_(module)
+BenchmarkModuleWidget::BenchmarkModuleWidget(QWidget *parent, BenchmarkModule *module) : ModuleWidget(parent), module_(module)
 {
     // Set up user interface
     ui_.setupUi(this);

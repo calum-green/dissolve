@@ -21,8 +21,7 @@ class CalculateSDFModuleWidget : public ModuleWidget
     Q_OBJECT
 
     public:
-    CalculateSDFModuleWidget(QWidget *parent, const GenericList &processingData, CalculateSDFModule *module,
-                             const CoreData &coreData);
+    CalculateSDFModuleWidget(QWidget *parent, CalculateSDFModule *module, const CoreData &coreData);
 
     private:
     // Associated Module
@@ -39,11 +38,11 @@ class CalculateSDFModuleWidget : public ModuleWidget
     // DataViewers contained within this widget
     DataViewer *sdfGraph_;
     // Renderable for our SDF
-    std::shared_ptr<RenderableData3D> sdfRenderable_;
+    std::shared_ptr<Renderable> sdfRenderable_;
     // Reference molecule (Species) to display alongside density
     Species *referenceMolecule_;
     // Renderable for reference molecule
-    std::shared_ptr<RenderableSpecies> referenceMoleculeRenderable_;
+    std::shared_ptr<Renderable> referenceMoleculeRenderable_;
 
     public:
     // Update controls within widget

@@ -4,8 +4,7 @@
 #include "modules/test/gui/modulewidget.h"
 #include "modules/test/test.h"
 
-TestModuleWidget::TestModuleWidget(QWidget *parent, const GenericList &processingData, TestModule *module)
-    : ModuleWidget(parent, processingData), module_(module)
+TestModuleWidget::TestModuleWidget(QWidget *parent, TestModule *module) : ModuleWidget(parent), module_(module)
 {
     // Set up user interface
     ui_.setupUi(this);

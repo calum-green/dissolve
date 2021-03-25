@@ -20,7 +20,7 @@ class CalculateAvgMolModuleWidget : public ModuleWidget
     CalculateAvgMolModule *module_;
 
     public:
-    CalculateAvgMolModuleWidget(QWidget *parent, const GenericList &processingData, CalculateAvgMolModule *module);
+    CalculateAvgMolModuleWidget(QWidget *parent, CalculateAvgMolModule *module);
 
     /*
      * UI

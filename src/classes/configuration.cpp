@@ -75,8 +75,7 @@ bool Configuration::generate(ProcessPool &procPool, double pairPotentialRange)
 
     // Generate the contents
     Messenger::print("\nExecuting generator procedure for Configuration '{}'...\n\n", niceName());
-    GenericList dummyList;
-    auto result = generator_.execute(procPool, this, "Generator", dummyList);
+    auto result = generator_.execute(procPool, this, "Generator", moduleData_);
     if (!result)
         return Messenger::error("Failed to generate Configuration '{}'.\n", niceName());
     Messenger::print("\n");
@@ -177,6 +176,25 @@ void Configuration::setTemperature(double t) { temperature_ = t; }
 
 // Return configuration temperature
 double Configuration::temperature() const { return temperature_; }
+
+/*
+ * Modules
+ */
+
+// Associate Module to the Configuration
+bool Configuration::ownModule(Module *module) { return moduleLayer_.own(module); }
+
+// Return number of Modules associated to this Configuration
+int Configuration::nModules() const { return moduleLayer_.nModules(); }
+
+// Return Module layer for this Configuration
+ModuleLayer &Configuration::moduleLayer() { return moduleLayer_; }
+
+// Return list of Modules associated to this Configuration
+ModuleList &Configuration::modules() { return moduleLayer_; }
+
+// Return list of data variables set by Modules
+GenericList &Configuration::moduleData() { return moduleData_; }
 
 /*
  * Parallel Comms

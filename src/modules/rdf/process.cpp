@@ -87,9 +87,8 @@ bool RDFModule::process(Dissolve &dissolve, ProcessPool &procPool)
 
         // Calculate unweighted partials for this Configuration
         bool alreadyUpToDate;
-        calculateGR(dissolve.processingModuleData(), procPool, cfg, method, rdfRange, binWidth, alreadyUpToDate);
-        auto &originalgr =
-            dissolve.processingModuleData().retrieve<PartialSet>(fmt::format("{}//OriginalGR", cfg->niceName()), uniqueName_);
+        calculateGR(procPool, cfg, method, rdfRange, binWidth, alreadyUpToDate);
+        auto &originalgr = cfg->moduleData().retrieve<PartialSet>("OriginalGR", uniqueName_);
 
         // Perform averaging of unweighted partials if requested, and if we're not already up-to-date
         if ((averaging > 1) && (!alreadyUpToDate))
@@ -97,17 +96,14 @@ bool RDFModule::process(Dissolve &dissolve, ProcessPool &procPool)
             // Store the current fingerprint, since we must ensure we retain it in the averaged T.
             std::string currentFingerprint{originalgr.fingerprint()};
 
-            Averaging::average<PartialSet>(dissolve.processingModuleData(), fmt::format("{}//OriginalGR", cfg->niceName()),
-                                           uniqueName_, averaging, averagingScheme);
+            Averaging::average<PartialSet>(cfg->moduleData(), "OriginalGR", uniqueName_, averaging, averagingScheme);
 
             // Need to rename data within the contributing datasets to avoid clashes with the averaged data
             for (auto n = averaging; n > 0; --n)
             {
-                if (!dissolve.processingModuleData().contains(fmt::format("{}//OriginalGR_{}", cfg->niceName(), n),
-                                                              uniqueName_))
+                if (!cfg->moduleData().contains(fmt::format("OriginalGR_{}", n), uniqueName_))
                     continue;
-                auto &p = dissolve.processingModuleData().retrieve<PartialSet>(
-                    fmt::format("{}//OriginalGR_{}", cfg->niceName(), n), uniqueName_);
+                auto &p = cfg->moduleData().retrieve<PartialSet>(fmt::format("OriginalGR_{}", n), uniqueName_);
                 p.setObjectTags(fmt::format("{}//{}//OriginalGR", cfg->niceName(), uniqueName_), fmt::format("Avg{}", n));
             }
 
@@ -123,15 +119,14 @@ bool RDFModule::process(Dissolve &dissolve, ProcessPool &procPool)
         {
             // Copy the already-calculated g(r), then calculate a new set using the Test method
             PartialSet referencePartials = originalgr;
-            calculateGR(dissolve.processingModuleData(), procPool, cfg, RDFModule::TestMethod, rdfRange, binWidth,
-                        alreadyUpToDate);
+            calculateGR(procPool, cfg, RDFModule::TestMethod, rdfRange, binWidth, alreadyUpToDate);
             if (!testReferencePartials(referencePartials, originalgr, 1.0e-6))
                 return false;
         }
 
         // Form unweighted g(r) from original g(r), applying any requested smoothing / intramolecular broadening
-        auto &unweightedgr = dissolve.processingModuleData().realise<PartialSet>(
-            fmt::format("{}//UnweightedGR", cfg->niceName()), uniqueName_, GenericItem::InRestartFileFlag);
+        PartialSet &unweightedgr =
+            cfg->moduleData().realise<PartialSet>("UnweightedGR", uniqueName_, GenericItem::InRestartFileFlag);
         calculateUnweightedGR(procPool, cfg, originalgr, unweightedgr, intraBroadening, smoothing);
 
         // Set names of resources and filename in Data1D within the PartialSet
@@ -148,7 +143,7 @@ bool RDFModule::process(Dissolve &dissolve, ProcessPool &procPool)
         dissolve.processingModuleData().realise<PartialSet>("UnweightedGR", uniqueName_, GenericItem::InRestartFileFlag);
 
     // Sum the partials from the associated Configurations
-    if (!RDFModule::sumUnweightedGR(dissolve.processingModuleData(), procPool, this, this, summedUnweightedGR))
+    if (!RDFModule::sumUnweightedGR(procPool, this, this, dissolve.processingModuleData(), summedUnweightedGR))
         return false;
 
     return true;

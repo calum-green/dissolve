@@ -26,6 +26,9 @@ bool MDModule::process(Dissolve &dissolve, ProcessPool &procPool)
     if (targetConfigurations_.nItems() == 0)
         return Messenger::error("No configuration targets set for module '{}'.\n", uniqueName());
 
+    GenericList &moduleData =
+        configurationLocal_ ? targetConfigurations_.firstItem()->moduleData() : dissolve.processingModuleData();
+
     // Get control parameters
     const auto capForce = keywords_.asBool("CapForces");
     const auto maxForce = keywords_.asDouble("CapForcesAt") * 100.0; // To convert from kJ/mol to 10 J/mol
@@ -81,7 +84,7 @@ bool MDModule::process(Dissolve &dissolve, ProcessPool &procPool)
 
         if (onlyWhenEnergyStable)
         {
-            auto stabilityResult = EnergyModule::checkStability(dissolve.processingModuleData(), cfg);
+            auto stabilityResult = EnergyModule::checkStability(cfg);
             if (stabilityResult == EnergyModule::NotAssessable)
                 return false;
             else if (stabilityResult == EnergyModule::EnergyUnstable)
@@ -123,8 +126,7 @@ bool MDModule::process(Dissolve &dissolve, ProcessPool &procPool)
         // Read in or assign random velocities
         // Realise the velocity array from the moduleData
         bool created;
-        auto &v = dissolve.processingModuleData().realise<Array<Vec3<double>>>(fmt::format("{}//Velocities", cfg->niceName()),
-                                                                               uniqueName(), GenericItem::NoFlag, &created);
+        auto &v = moduleData.realise<Array<Vec3<double>>>("Velocities", uniqueName(), GenericItem::NoFlag, &created);
         if (created)
         {
             randomVelocities = true;

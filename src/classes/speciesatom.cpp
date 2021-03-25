@@ -70,10 +70,10 @@ void SpeciesAtom::setAtomType(std::shared_ptr<AtomType> at)
 // Return SpeciesAtomType of SpeciesAtom
 std::shared_ptr<AtomType> SpeciesAtom::atomType() const { return atomType_; }
 
-// Set index (0->[N-1])
+// Set List index (0->[N-1])
 void SpeciesAtom::setIndex(int id) { index_ = id; }
 
-// Return index (0->[N-1])
+// Return List index (0->[N-1])
 int SpeciesAtom::index() const { return index_; }
 
 // Return 'user' index (1->N)

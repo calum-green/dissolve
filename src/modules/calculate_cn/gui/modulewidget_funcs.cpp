@@ -7,9 +7,8 @@
 #include "modules/calculate_rdf/rdf.h"
 #include "procedure/nodes/process1d.h"
 
-CalculateCNModuleWidget::CalculateCNModuleWidget(QWidget *parent, const GenericList &processingData,
-                                                 CalculateCNModule *cnModule)
-    : ModuleWidget(parent, processingData), module_(cnModule)
+CalculateCNModuleWidget::CalculateCNModuleWidget(QWidget *parent, CalculateCNModule *cnModule)
+    : ModuleWidget(parent), module_(cnModule)
 {
     // Set up user interface
     ui_.setupUi(this);
@@ -93,8 +92,8 @@ void CalculateCNModuleWidget::setGraphDataTargets()
     }
 
     // Set RDF data target
-    auto rdfRenderable = rdfGraph_->createRenderable<RenderableData1D>(rdfModule->rdfResult()->processedData().objectTag(),
-                                                                       rdfModule->uniqueName());
+    auto rdfRenderable = rdfGraph_->createRenderable(
+        Renderable::Data1DRenderable, rdfModule->rdfResult()->processedData().objectTag(), rdfModule->uniqueName());
     rdfRenderable->setColour(StockColours::BlueStockColour);
 
     rdfDataLocated_ = true;

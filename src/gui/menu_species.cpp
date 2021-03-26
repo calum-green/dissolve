@@ -37,6 +37,7 @@ void DissolveWindow::on_SpeciesCreateDrawAction_triggered(bool checked)
     {
         // Renumber the atoms so they are sequential
         newSpecies->renumberAtoms();
+        newSpecies->updateIntramolecularTerms();
 
         setModified();
         fullUpdate();
@@ -84,6 +85,9 @@ void DissolveWindow::on_SpeciesImportFromXYZAction_triggered(bool checked)
         dissolve_.removeSpecies(sp);
         return;
     }
+
+    // Add higher-order connectivity
+    sp->updateIntramolecularTerms();
 
     // Fully update GUI
     setModified();
